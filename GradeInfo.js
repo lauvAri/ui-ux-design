@@ -2,6 +2,9 @@ import students from './students.js';
 import subjects from './subjects.js';
 let columns = [
     {
+        prop:'name', label: '姓名', width: '180'
+    },
+    {
         prop: 'grades.chinese', label: '语文', width: '180'
     },
     {
@@ -15,19 +18,19 @@ const GradeInfo = {
     template: `
       <div>
           <el-button @click="addSubject()">添加科目</el-button>
+          <el-table
+                :data="students"
+                border
+                style="width: 100%">
+                <el-table-column
+                    v-for="column in columns"
+                    :key="column.prop"
+                    :prop="column.prop"
+                    :label="column.label"
+                    :width="column.width">
+                </el-table-column>
+            </el-table>
       </div>
-      <el-table
-        :data="students"
-        border
-        style="width: 100%">
-        <el-table-column
-              v-for="column in columns"
-              :key="column.prop"
-              :prop="column.prop"
-              :label="column.label"
-              :width="column.width">
-        </el-table-column>
-      </el-table>
     `,
     data(){
         return {
