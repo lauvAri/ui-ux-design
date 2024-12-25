@@ -54,6 +54,15 @@
             width: 400px;
             margin: 0 auto;
         }
+        #filter-student {
+            display: flex;
+            justify-content: flex-start;
+            gap: 20px;
+        }
+        #search-student {
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 <body>
@@ -96,8 +105,8 @@
                 </el-aside>
                 <el-main id="main">
                     <div class="student-info" v-if="currentMenu === '1-1'">
-                        <button @click="toggleView('event-form')">切换表单显示</button>
-                        <button @click="toggleView('event-table')">切换表格显示</button>
+                        <el-button @click="toggleView('event-form')">切换表单显示</el-button>
+                        <el-button @click="toggleView('event-table')">切换表格显示</el-button>
                         <event-form v-if="currentView === 'event-form'"></event-form>
                         <script type="module" src="./EventForm.js"></script>
                         <event-table v-if="currentView === 'event-table'"></event-table>
