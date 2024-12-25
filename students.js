@@ -1,6 +1,14 @@
+import majors from "./majors.js";
+import schools from "./schools.js";
+
 let students = [
     {
         name: '王大虎',
+        gender: '男',
+        studentId: '20210001',
+        mobile: '12345678901',
+        school: '信息科学与工程学院',
+        major: '计算机科学与技术',
         grades: {
             语文: 90,
             数学: 80,
@@ -10,6 +18,11 @@ let students = [
     },
     {
         name: '王二虎',
+        gender: '男',
+        studentId: '20210002',
+        mobile: '12345678902',
+        school: '软件学院',
+        major: '软件工程',
         grades: {
             语文: 90,
             数学: 80,
@@ -18,6 +31,11 @@ let students = [
     },
     {
         name: '王小虎',
+        gender: '男',
+        studentId: '20210003',
+        mobile: '12345678903',
+        school: '信息科学与工程学院',
+        major: '通信工程',
         grades: {
             语文: 90,
             数学: 80,
@@ -26,6 +44,11 @@ let students = [
     },
     {
         name: '张豆',
+        gender: '女',
+        studentId: '20210004',
+        mobile: '12345678904',
+        school: '信息科学与工程学院',
+        major: '电子信息工程',
         grades: {
             语文: 90,
             数学: 80,
@@ -35,6 +58,11 @@ let students = [
     },
     {
         name: '张豆豆',
+        gender: '女',
+        studentId: '20210005',
+        mobile: '12345678905',
+        school: '信息科学与工程学院',
+        major: '自动化',
         grades: {
             语文: 90,
             数学: 80,
@@ -44,6 +72,11 @@ let students = [
     },
     {
         name: '张小豆',
+        gender: '女',
+        studentId: '20210006',
+        mobile: '12345678906',
+        school: '信息科学与工程学院',
+        major: '信息安全',
         grades: {
             语文: 90,
             数学: 80,
@@ -54,6 +87,11 @@ let students = [
     },
     {
         name: '张大豆',
+        gender: '男',
+        studentId: '20210007',
+        mobile: '12345678907',
+        school: '信息科学与工程学院',
+        major: '物联网工程',
         grades: {
             语文: 90,
             数学: 80,
@@ -65,6 +103,11 @@ let students = [
     },
     {
         name: '张二豆',
+        gender: '男',
+        studentId: '20210008',
+        mobile: '12345678908',
+        school: '信息科学与工程学院',
+        major: '智能科学与技术',
         grades: {
             语文: 90,
             数学: 80,
@@ -76,6 +119,11 @@ let students = [
     },
     {
         name: '肖美香',
+        gender: '女',
+        studentId: '20210009',
+        mobile: '12345678909',
+        school: '信息科学与工程学院',
+        major: '测控技术与仪器',
         grades: {
             语文: 90,
             数学: 80,
@@ -87,6 +135,11 @@ let students = [
     },
     {
         name: '马冬梅',
+        gender: '女',
+        studentId: '20210010',
+        mobile: '12345678910',
+        school: '信息科学与工程学院',
+        major: '电气工程及其自动化',
         grades: {
             语文: 90,
             数学: 80,
@@ -98,6 +151,11 @@ let students = [
     },
     {
         name: '丁丁',
+        gender: '男',
+        studentId: '20210011',
+        mobile: '12345678911',
+        school: '信息科学与工程学院',
+        major: '计算机科学与技术',
         grades: {
             语文: 90,
             数学: 80,
@@ -109,6 +167,11 @@ let students = [
     },
     {
         name: '丁小丁',
+        gender: '男',
+        studentId: '20210012',
+        mobile: '12345678912',
+        school: '信息科学与工程学院',
+        major: '信息安全',
         grades: {
             语文: 90,
             数学: 80,
@@ -119,6 +182,11 @@ let students = [
     },
     {
         name: '李明',
+        gender: '男',
+        studentId: '20210013',
+        mobile: '12345678913',
+        school: '信息科学与工程学院',
+        major: '物联网工程',
         grades: {
             语文: 90,
             数学: 80,
@@ -129,6 +197,11 @@ let students = [
     },
     {
         name: '李小明',
+        gender: '男',
+        studentId: '20210014',
+        mobile: '12345678914',
+        school: '信息科学与工程学院',
+        major: '智能科学与技术',
         grades: {
             语文: 90,
             数学: 80,
@@ -140,6 +213,11 @@ let students = [
     },
     {
         name: '赵跑跑',
+        gender: '男',
+        studentId: '20210015',
+        mobile: '12345678915',
+        school: '信息科学与工程学院',
+        major: '测控技术与仪器',
         grades: {
             语文: 90,
             数学: 80,
@@ -151,6 +229,11 @@ let students = [
     },
     {
         name: '孙小孙',
+        gender: '女',
+        studentId: '20210016',
+        mobile: '12345678916',
+        school: '信息科学与工程学院',
+        major: '电气工程及其自动化',
         grades: {
             语文: 90,
             数学: 80,
@@ -161,6 +244,11 @@ let students = [
     },
     {
         name: '黄希希',
+        gender: '女',
+        studentId: '20210017',
+        mobile: '12345678917',
+        school: '信息科学与工程学院',
+        major: '电子信息工程',
         grades: {
             语文: null,
             数学: null,
@@ -168,7 +256,5 @@ let students = [
         },
     },
 ]
-
-
 
 export default students;
