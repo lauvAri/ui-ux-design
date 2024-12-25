@@ -105,7 +105,11 @@ const GradeInfo = {
             if (row.inputValue < 0 || row.inputValue > 100) {
                 // 使用Element UI的$message方法提示用户
                 this.$message.error('成绩必须在0到100之间，请重新输入。');
-            } else {
+            } 
+            else if (row.inputValue === '') {
+                this.$message.error('成绩不能为空，请重新输入。');
+            }
+            else {
                 // 根据选择的科目更新对应的成绩
                 const subjectKey = `grades.${row.selectedSubject.toLowerCase()}`;
                 if (!row.grades) {
