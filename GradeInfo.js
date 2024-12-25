@@ -10,7 +10,22 @@ students.forEach(student => {
 const GradeInfo = {
     template: `
       <div>
-          <el-button @click="showDialog = true">修改科目</el-button>
+          <div style="display: flex; align-items: center; margin-bottom: 10px;">
+              <el-button @click="showDialog = true" style="margin-right: 10px;">修改科目</el-button>
+              
+              <el-input
+                  placeholder="输入姓名或关键字进行搜索"
+                  v-model="searchKeyword"
+                  size="mini"
+                  style="width: 200px; margin-right: 10px;">
+              </el-input>
+              <el-button
+                  type="primary"
+                  size="mini"
+                  @click="filterStudents">
+                  查询
+              </el-button>
+          </div>
           
           <el-dialog title="选择科目" :visible.sync="showDialog">
               <el-checkbox-group v-model="selectedSubjects">
@@ -27,7 +42,7 @@ const GradeInfo = {
               <el-table-column label="操作">
                   <template slot-scope="scope">
                       <div style="display: flex; align-items: center;">
-                          <el-select v-model="scope.row.selectedSubject" placeholder="选择科目" size="mini" style="margin-right: 10px;">
+                          <el-select v-model="scope.row.selectedSubject" placeholder="选择科目" size="mini" style="width: 100px; margin-right: 10px;">
                               <el-option
                                   v-for="subject in filteredSubjects(scope.row)"
                                   :key="subject"
@@ -39,7 +54,7 @@ const GradeInfo = {
                               placeholder="请输入成绩"
                               v-model="scope.row.inputValue"
                               size="mini"
-                              style="margin-right: 10px;">
+                              style="width: 120px; margin-right: 10px;">
                           </el-input>
                           <el-button
                               type="primary"
@@ -65,7 +80,8 @@ const GradeInfo = {
                 { prop: 'grades.english', label: '英语', width: '150' }
             ],
             showDialog: false,
-            selectedSubjects: ['语文', '数学', '英语'] // 初始化 selectedSubjects 为语文、数学和英语
+            selectedSubjects: ['语文', '数学', '英语'], // 初始化 selectedSubjects 为语文、数学和英语
+            searchKeyword: '' // 用于存储搜索关键字
         }
     },
     watch: {
@@ -137,6 +153,9 @@ const GradeInfo = {
                         this.$set(student.grades, subjectKey, "未录入");
                     }
                 });
+                // 更新每个学生的 selectedSubject 属性为第一个显示“未录入”的课程
+                const firstUnrecordedSubject = this.selectedSubjects.find(subject => student.grades[subject.toLowerCase()] === "未录入");
+                student.selectedSubject = firstUnrecordedSubject || this.selectedSubjects[0];
             });
             
             // 过滤 students 数据，只保留包含所有 selectedSubjects 成绩的学生
@@ -145,12 +164,26 @@ const GradeInfo = {
                     return student.grades && student.grades[subject.toLowerCase()] !== "未选择";
                 });
             });
+
+            // 按照名字的字典顺序对 filteredStudents 进行排序
+            this.filteredStudents.sort((a, b) => a.name.localeCompare(b.name));
             
             // 关闭对话框
             this.showDialog = false;
         },
         filteredSubjects(student) {
             return this.selectedSubjects.filter(subject => student.grades[subject.toLowerCase()] !== "未选择");
+        },
+        filterStudents() {
+            const keyword = this.searchKeyword.toLowerCase();
+            if (keyword) {
+                this.filteredStudents = this.students.filter(student => {
+                    return student.name.toLowerCase().includes(keyword);
+                });
+            } else {
+                // 如果没有输入关键字，返回最开始根据勾选产生的按照字典顺序排序的表格
+                this.updateColumns();
+            }
         }
     }
 }
