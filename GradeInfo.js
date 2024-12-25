@@ -17,7 +17,8 @@ const GradeInfo = {
                   placeholder="输入姓名或关键字进行搜索"
                   v-model="searchKeyword"
                   size="mini"
-                  style="width: 200px; margin-right: 10px;">
+                  style="width: 200px; margin-right: 10px;"
+                  @keyup.enter="filterStudents">
               </el-input>
               <el-button
                   type="primary"
@@ -42,7 +43,7 @@ const GradeInfo = {
               <el-table-column label="操作">
                   <template slot-scope="scope">
                       <div style="display: flex; align-items: center;">
-                          <el-select v-model="scope.row.selectedSubject" placeholder="选择科目" size="mini" style="width: 100px; margin-right: 10px;">
+                          <el-select v-model="scope.row.selectedSubject" placeholder="选择科目" size="mini" style="width: 120px; margin-right: 10px;">
                               <el-option
                                   v-for="subject in filteredSubjects(scope.row)"
                                   :key="subject"
@@ -54,7 +55,8 @@ const GradeInfo = {
                               placeholder="请输入成绩"
                               v-model="scope.row.inputValue"
                               size="mini"
-                              style="width: 120px; margin-right: 10px;">
+                              style="width: 120px; margin-right: 10px;"
+                              @keyup.enter="updateScore(scope.row)">
                           </el-input>
                           <el-button
                               type="primary"
@@ -106,9 +108,6 @@ const GradeInfo = {
             } else {
                 // 根据选择的科目更新对应的成绩
                 const subjectKey = `grades.${row.selectedSubject.toLowerCase()}`;
-                if(row.grades && row.grades[row.selectedSubject.toLowerCase()] === "未录入") {
-                    return;
-                }
                 if (!row.grades) {
                     this.$set(row, 'grades', {});
                 }
@@ -172,18 +171,29 @@ const GradeInfo = {
             this.showDialog = false;
         },
         filteredSubjects(student) {
-            return this.selectedSubjects.filter(subject => student.grades[subject.toLowerCase()] !== "未选择");
+            // 确保下拉框中的科目按照固定的顺序显示
+            const subjectOrder = ['语文', '数学', '英语', '物理', '化学', '生物', '历史', '地理', '政治'];
+            return subjectOrder.filter(subject => this.selectedSubjects.includes(subject) && student.grades[subject.toLowerCase()] !== "未选择");
         },
         filterStudents() {
             const keyword = this.searchKeyword.toLowerCase();
+            // 先过滤出包含所有勾选科目的学生
+            const studentsWithSelectedSubjects = this.students.filter(student => {
+                return this.selectedSubjects.every(subject => {
+                    return student.grades && student.grades[subject.toLowerCase()] !== "未选择";
+                });
+            });
+            // 再根据关键字进行搜索
             if (keyword) {
-                this.filteredStudents = this.students.filter(student => {
+                this.filteredStudents = studentsWithSelectedSubjects.filter(student => {
                     return student.name.toLowerCase().includes(keyword);
                 });
             } else {
                 // 如果没有输入关键字，返回最开始根据勾选产生的按照字典顺序排序的表格
-                this.updateColumns();
+                this.filteredStudents = studentsWithSelectedSubjects;
             }
+            // 按照名字的字典顺序对 filteredStudents 进行排序
+            this.filteredStudents.sort((a, b) => a.name.localeCompare(b.name));
         }
     }
 }
