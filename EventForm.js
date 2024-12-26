@@ -1,6 +1,7 @@
 // EventFormComponent.js
 import majors from './majors.js';
 import schools from './schools.js';
+import { addStudent } from './db.js';
 
 // 定义 EventForm 组件
 const EventForm = {
@@ -11,8 +12,8 @@ const EventForm = {
     </el-form-item>
     <el-form-item label="学生性别">
       <el-select v-model="form.gender" placeholder="选择性别">
-        <el-option label="男" value="male"></el-option>
-        <el-option label="女" value="female"></el-option>
+        <el-option label="男" value="男"></el-option>
+        <el-option label="女" value="女"></el-option>
       </el-select>
     </el-form-item>
     <el-form-item label="入学时间">
@@ -51,7 +52,6 @@ const EventForm = {
   </el-form>
   `,
   data() {
-    console.log('majors', majors);
     return {
       form: {
         name: '',
@@ -73,10 +73,25 @@ const EventForm = {
     }
   },
   methods: {
-    onSubmit() {
+    async onSubmit() {
       console.log('submit!');
       // 提交逻辑
-      this.$message.success('提交成功！');
+      const newStudent = { ...this.form };
+      newStudent.grades = {};
+      let studentArray = [];
+      studentArray.push(newStudent);
+
+      let dbRequest = indexedDB.open('mydb', 1);
+      dbRequest.onsuccess = async (event) => {
+        let db = event.target.result;
+        try {
+          await addStudent(db, studentArray);
+          this.$message.success('提交成功！');
+        } catch (error) {
+          console.error(error);
+          this.$message.error('提交失败！');
+        }
+      };
     },
     resetForm() {
       Object.assign(this.$data.form, this.$options.data().form); // 重置表单

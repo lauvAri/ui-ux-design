@@ -42,7 +42,7 @@ const EventTable = {
             </el-select>
             <el-select v-model=major placeholder="选择专业" filterable @change="updateStudents">
                 <el-option
-                    v-for="item in majorsFiltered"
+                    v-for="item in majors.filter(major => major.school == school)"
                     :key="item.value"
                     :label="item.label"
                     :value="item.value"
@@ -53,6 +53,53 @@ const EventTable = {
                 <el-button icon="el-icon-search" circle @click='searchStudentByName()'></el-button>
             </div>
         </div>
+        <!-- 触发新增学生对话框的按钮 -->
+        <el-button type="primary" @click="dialogVisible = true">新增学生</el-button>
+
+        <!-- 新增学生的弹出表单 -->
+        <el-dialog title="新增学生" :visible.sync="dialogVisible">
+            <el-form :model="newStudent" label-width="80px">
+                <el-form-item label="姓名">
+                    <el-input v-model="newStudent.name"></el-input>
+                </el-form-item>
+                <el-form-item label="性别">
+                    <el-select v-model="newStudent.gender">
+                        <el-option value="男" label="男"></el-option>
+                        <el-option value="女" label="女"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="学号">
+                    <el-input v-model="newStudent.studentId"></el-input>
+                </el-form-item>
+                <el-form-item label="电话号码">
+                    <el-input v-model="newStudent.mobile"></el-input>
+                </el-form-item>
+                <el-form-item label="学院">
+                    <el-select v-model="newStudent.school" placeholder="选择学院" filterable>
+                        <el-option
+                            v-for="item in schools"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="专业">
+                    <el-select v-model="newStudent.major" placeholder="选择专业" filterable>
+                        <el-option
+                            v-for="item in majors.filter(major => major.school === newStudent.school)"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="closeDialog">取 消</el-button>
+                <el-button type="primary" @click="addNewStudentAndClose">确 定</el-button>
+            </span>
+        </el-dialog>
        
         <el-table
             :data="studentsFiltered"
@@ -68,6 +115,15 @@ const EventTable = {
     `,
     data() {
         return {
+            dialogVisible: false,
+            newStudent: {
+                name: '',
+                gender: '',
+                studentId: '',
+                mobile: '',
+                school: '',
+                major: ''
+            },
             name: '',
             gender: '',
             studentId: '',
@@ -75,9 +131,7 @@ const EventTable = {
             school: '',
             major: '',
 
-            // 使用原始学生数据作为备份
             originalStudents: students,
-            // 过滤后的学生列表，初始值为所有学生
             studentsFiltered: students,
 
             columns,
@@ -106,6 +160,30 @@ const EventTable = {
                 return matchesSchool && matchesMajor;
             });
         },
+        addNewStudentAndClose() {
+            this.originalStudents.push({ ...this.newStudent });
+            this.studentsFiltered = [...this.originalStudents]; // 更新过滤后的列表
+
+            // 清空表单
+            this.resetNewStudent();
+
+            // // 关闭对话框
+            // this.dialogVisible = false;
+        },
+        closeDialog() {
+            this.dialogVisible = false;
+            this.resetNewStudent(); // 取消时也重置表单
+        },
+        resetNewStudent() {
+            this.newStudent = {
+                name: '',
+                gender: '',
+                studentId: '',
+                mobile: '',
+                school: '',
+                major: ''
+            };
+        },
     },
     watch: {
         school(newVal) {
@@ -118,14 +196,12 @@ const EventTable = {
         }
     },
     computed: {
-        majorsFiltered() {
-            return majors.filter(major => major.school === this.school);
-        },
         studentsFiltered() {
-            return students.filter(student => student.school === this.school && student.major === this.major);
-        },
+            return originalStudents.filter(student =>
+                (!this.school || student.school === this.school) &&
+                (!this.major || student.major === this.major))
+        } 
     },
-
 }
 
 export default EventTable;
