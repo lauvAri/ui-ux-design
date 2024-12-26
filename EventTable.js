@@ -161,9 +161,31 @@ const EventTable = {
             });
         },
         addNewStudentAndClose() {
+            if (this.newStudent.name.trim() === '' ||
+                this.newStudent.gender.trim() === '' ||
+                this.newStudent.studentId.trim() === '' ||
+                this.newStudent.mobile.trim() === '' ||
+                this.newStudent.school.trim() === '' ||
+                this.newStudent.major.trim() === '') {
+                    //提醒失败
+                    const h = this.$createElement;
+
+                    this.$notify({
+                        title: '提交失败',
+                        message: h('i', { style: 'color: red' }, '请完整填写表单')
+                    });
+                return;
+                }
             this.originalStudents.push({ ...this.newStudent });
             this.studentsFiltered = [...this.originalStudents]; // 更新过滤后的列表
 
+            //提醒成功
+            const h = this.$createElement;
+
+            this.$notify({
+                title: '提交成功',
+                message: h('i', { style: 'color: green' }, '提交成功！')
+            });
             // 清空表单
             this.resetNewStudent();
 
