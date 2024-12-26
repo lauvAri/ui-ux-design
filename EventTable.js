@@ -104,7 +104,9 @@ const EventTable = {
        
         <el-table
             :data="studentsFiltered"
-            style="width: 100%">
+            style="width: 100%"
+            height="600"
+            >
             <el-table-column
                 v-for="column in columns"
                 :key="column.prop"
