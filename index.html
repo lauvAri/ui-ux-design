@@ -89,14 +89,26 @@
                                 <el-menu-item index="1-2" @click="currentMenu = '1-2'">成绩录入</el-menu-item>
                             </el-menu-item-group>
                         </el-submenu>
-                        <el-menu-item index="2" @click="currentMenu = '2'">
-                            <i class="el-icon-menu"></i>
-                            <span slot="title">考勤管理</span>
-                        </el-menu-item>
-                        <el-menu-item index="3" @click="currentMenu = '3'">
-                            <i class="el-icon-document"></i>
-                            <span slot="title">通知公告</span>
-                        </el-menu-item>
+                        <el-submenu index="2">
+                            <template slot="title">
+                                <i class="el-icon-location"></i>
+                                <span>教学管理</span>
+                            </template>
+                            <el-menu-item-group>
+                                <el-menu-item index="2-1" @click="currentMenu = '2-1'">课程管理</el-menu-item>
+                                <el-menu-item index="2-2" @click="currentMenu = '2-2'">考勤管理</el-menu-item>
+                            </el-menu-item-group>
+                        </el-submenu>
+                        <el-submenu index="3">
+                            <template slot="title">
+                                <i class="el-icon-location"></i>
+                                <span>通知公告</span>
+                            </template>
+                            <el-menu-item-group>
+                                <el-menu-item index="3-1" @click="currentMenu = '3-1'">公告展示</el-menu-item>
+                                <el-menu-item index="3-2" @click="currentMenu = '3-2'">发布公告</el-menu-item>
+                            </el-menu-item-group>
+                        </el-submenu>
                         <el-menu-item index="4" @click="currentMenu = '4'">
                             <i class="el-icon-setting"></i>
                             <span slot="title">账户设置</span>
@@ -112,11 +124,19 @@
                         <grade-info></grade-info>
                         <script type="module" src="./GradeInfo.js"></script>
                     </div>
-                    <div class="attendance-info" v-if="currentMenu === '2'">
+                    <div class="course-info" v-if="currentMenu === '2-1'">
+                        这是课程管理页面
+                    </div>
+                    <div class="attendance-info" v-if="currentMenu === '2-2'">
                         这是考勤管理页面
                     </div>
-                    <div class="notice-info" v-if="currentMenu === '3'">
-                        这是通知公告页面
+                    <div class="notice-info" v-if="currentMenu === '3-1'">
+                        <event-notice></event-notice>
+                        <script type="module" src="./EventNotice.js"></script>
+                    </div>
+                    <div class="release-info" v-if="currentMenu === '3-2'">
+                        <event-release></event-release>
+                        <script type="module" src="./EventRelease.js"></script>
                     </div>
                     <div class="account-info" v-if="currentMenu === '4'">
                         这是账户设置页面
