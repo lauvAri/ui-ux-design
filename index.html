@@ -99,15 +99,10 @@
                                 <el-menu-item index="2-2" @click="currentMenu = '2-2'">考勤管理</el-menu-item>
                             </el-menu-item-group>
                         </el-submenu>
-                        <el-submenu index="3">
-                            <template slot="title">
-                                <i class="el-icon-location"></i>
-                                <span>通知公告</span>
-                            </template>
-                            <el-menu-item-group>
-                                <el-menu-item index="3-1" @click="currentMenu = '3-1'">公告展示</el-menu-item>
-                            </el-menu-item-group>
-                        </el-submenu>
+                        <el-menu-item index="3" @click="currentMenu = '3'">
+                            <i class="el-icon-location"></i>
+                            <span slot="title">公告展示</span>
+                        </el-menu-item>
                         <el-menu-item index="4" @click="currentMenu = '4'">
                             <i class="el-icon-setting"></i>
                             <span slot="title">账户设置</span>
@@ -127,9 +122,10 @@
                         这是课程管理页面
                     </div>
                     <div class="attendance-info" v-if="currentMenu === '2-2'">
-                        这是考勤管理页面
+                        <event-attend></event-attend>
+                        <script type="module" src="./EventAttend.js"></script>
                     </div>
-                    <div class="notice-info" v-if="currentMenu === '3-1'">
+                    <div class="notice-info" v-if="currentMenu === '3'">
                         <event-notice></event-notice>
                         <script type="module" src="./EventNotice.js"></script>
                     </div>
