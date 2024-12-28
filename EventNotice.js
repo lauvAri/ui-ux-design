@@ -14,7 +14,9 @@ const EventNotice = {
                 label="文件标题"
                 width="550">
                 <template slot-scope="scope">
-                    <a class="table-info" :href="scope.row.url" target="_blank" rel="noopener noreferrer">{{ scope.row.info }}</a>
+                    <el-link class="table-info" :href="getNoticeUrl(scope.row.id)" target="_blank" rel="noopener noreferrer">
+                       {{ scope.row.info }}
+                     </el-link>
                 </template>
             </el-table-column>
             <el-table-column
@@ -147,10 +149,10 @@ const EventNotice = {
         addNewNoticeAndClose() {
             const currentDate = new Date().toISOString().split('T')[0];
             const newNotice = {
+                id: Date.now().toString(), // 生成唯一 ID
                 info: this.newNotice.info,
                 source: this.newNotice.source,
                 date: currentDate,
-                url: 'https://www.kaggle.com/datasets',
                 mainText: this.newNotice.mainText
             };
 
@@ -169,6 +171,9 @@ const EventNotice = {
                     type: 'success'
                 });
             }
+        },
+        getNoticeUrl(id) {
+            return `./notice-detail.html?id=${id}`; // 生成公告详情页链接
         },
         handleClick(row) {
             if (row.url) {

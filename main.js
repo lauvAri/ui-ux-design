@@ -5,6 +5,7 @@ new Vue({
             visible: true,
             currentMenu: '',
             currentView: '',
+            currentNotice:''
         }
     },
     methods : {

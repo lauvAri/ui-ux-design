@@ -1,8 +1,6 @@
 // notices.js
-
 const STORAGE_KEY = 'notice_data';
 
-// 从 localStorage 获取数据，如果没有则使用默认数据
 const getStoredNotices = () => {
     const storedData = localStorage.getItem(STORAGE_KEY);
     if (storedData) {
@@ -11,172 +9,46 @@ const getStoredNotices = () => {
     // 默认数据
     const defaultNotices = [
         {
+            id: '1', // 确保每个通知都有唯一的 id
             info: '关于开展学校“十四五”发展规划等实施情况年度检查与评估工作',
             source: '发展规划与学科建设处',
             date: '2024-12-24',
-            url: 'https://oa.csu.edu.cn/con/'
+            mainText: '<p>这是主要内容。</p>'
         },
         {
+            id: '2',
             info: '2023-2024学年第二学期评教评学情况通报',
             source: '本科生院',
             date: '2024-12-24',
-            url: 'https://www.swcontest.com.cn/index'
+            mainText: '<p>这是主要内容。</p>'
         },
         {
-            info: '关于做好2024年工作总结和2025年工作计划的通知',
-            source: '学校办公室',
-            date: '2024-12-06',
-            url: 'https://54sh.csu.edu.cn/'
+            id: '3', // 确保每个通知都有唯一的 id
+            info: '关于开展学校“十四五”发展规划等实施情况年度检查与评估工作',
+            source: '发展规划与学科建设处',
+            date: '2024-12-24',
+            mainText: '<p>这是主要内容。</p>'
         },
         {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-09-26',
-            url: 'https://www.kaggle.com/datasets'
+            id: '4',
+            info: '2023-2024学年第二学期评教评学情况通报',
+            source: '本科生院',
+            date: '2024-12-24',
+            mainText: '<p>这是主要内容。</p>'
         },
         {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-09-02',
-            url: 'https://www.kaggle.com/datasets'
+            id: '5', // 确保每个通知都有唯一的 id
+            info: '关于开展学校“十四五”发展规划等实施情况年度检查与评估工作',
+            source: '发展规划与学科建设处',
+            date: '2024-12-24',
+            mainText: '<p>这是主要内容。</p>'
         },
         {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-08-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-24',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-08-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-24',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-08-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-24',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-24',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-24',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-24',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-24',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-24',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-24',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-01',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-24',
-            url: 'https://www.kaggle.com/datasets'
-        },
-        {
-            info: '关于公布学校领导分工情况的通知',
-            source: '学校办公室',
-            date: '2024-06-01',
-            url: 'https://www.kaggle.com/datasets'
+            id: '6',
+            info: '2023-2024学年第二学期评教评学情况通报',
+            source: '本科生院',
+            date: '2024-12-24',
+            mainText: '<p>这是主要内容。</p>'
         }
     ];
     // 存储默认数据

@@ -1,0 +1,25 @@
+<!-- notice-detail.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公告详情</title>
+    <!-- 引入 Vue 和 Element UI 的样式和脚本 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="app">
+    <notice-show></notice-show>
+</div>
+<script type="module">
+    import NoticeShow from './NoticeShow.js';
+    new Vue({
+        el: '#app',
+        components: { NoticeShow }
+    });
+</script>
+</body>
+</html>
