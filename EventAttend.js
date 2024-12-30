@@ -5,7 +5,7 @@ const EventAttend = {
 <div>
     <!-- 添加考勤记录的表单 -->
     <div class="form-container" style="width: 100%; margin: 20px 0; padding:0;" >
-      <el-form @submit.prevent="addAttendance" style="width: 100%" inline>
+      <el-form @submit.prevent="showConfirmDialog" style="width: 100%" inline>
         <el-row :gutter="24" type="flex" align="left" style="width: 100%;">
           <!-- 姓名 -->
           <el-col :span="6">
@@ -22,53 +22,108 @@ const EventAttend = {
           <!-- 状态 -->
           <el-col :span="6">
             <el-form-item label="状态">
-              <el-select v-model="newAttendance.status" placeholder="选择考勤状态" filterable style="width: 100%" required>
+             <el-select v-model="newAttendance.status" placeholder="选择考勤状态" filterable style="width: 100%" required>
+                <el-option value="" disabled selected>请选择</el-option>
                 <el-option value="出勤">出勤</el-option>
                 <el-option value="缺勤">缺勤</el-option>
                 <el-option value="迟到">迟到</el-option>
                 <el-option value="早退">早退</el-option>
-              </el-select>
+            </el-select>
             </el-form-item>
           </el-col>
           <!-- 添加按钮 -->
           <el-col :span="6">
             <el-form-item>
-              <el-button type="primary" native-type="submit">添加</el-button>
+              <el-button type="primary" @click="showConfirmDialog">添加</el-button>
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
     </div>
+     <!-- 确认新增对话框 -->
+        <el-dialog
+            title="确认新增"
+            :visible.sync="confirmDialogVisible"
+            width="30%">
+            <span>确定新增这条考勤信息吗？ {{ confirmationMessage }}</span>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="confirmDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="addNewAttendanceAndClose">确 定</el-button>
+            </span>
+        </el-dialog>
 
-    <!-- 考勤记录表格 -->
+        <!-- 修改考勤状态对话框 -->
+        <el-dialog
+            title="修改考勤状态"
+            :visible.sync="editDialogVisible"
+            width="30%">
+            <div class="edit-form">
+                <div class="info-row">
+                    <span class="label">姓名：</span>
+                    <span class="value">{{ editingAttendance.name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">日期：</span>
+                    <span class="value">{{ formatDate(editingAttendance.date) }}</span>
+                </div>
+                <div class="status-row">
+                    <span class="label">状态：</span>
+                    <el-radio-group v-model="editingAttendance.status">
+                        <el-radio label="出勤">出勤</el-radio>
+                        <el-radio label="缺勤">缺勤</el-radio>
+                        <el-radio label="迟到">迟到</el-radio>
+                        <el-radio label="早退">早退</el-radio>
+                    </el-radio-group>
+                </div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="confirmEdit">确 定</el-button>
+            </span>
+        </el-dialog>
+        
+     <!-- 考勤记录表格 -->
     <div class="table-container">
-      <el-table :data="attends" style="width: 100%">
+      <el-table :data="paginatedAttends" style="width: 100%">
         <el-table-column prop="name" label="姓名" width="150"></el-table-column>
         <el-table-column prop="date" label="日期" width="150"></el-table-column>
         <el-table-column prop="status" label="状态" width="150"></el-table-column>
-        <el-table-column label="操作" width="100">
+        <el-table-column label="操作" width="200">
           <template slot-scope="scope">
+            <el-button type="primary" size="mini" @click="showEditDialog(scope.$index)">修改</el-button>
             <el-button type="danger" size="mini" @click="deleteRecord(scope.$index)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
+      
+      <!-- 分页器 -->
+      <el-pagination
+        @current-change="handleCurrentChange"
+        :current-page.sync="currentPage"
+        :page-size="pageSize"
+        layout="prev, pager, next"
+        :total="total"
+        class="mt-4"
+      />
     </div>
+  </div>
   </div>
 <style>
 .el-form-item {
-  margin-bottom: 0; /* 移除表单项的底部边距 */
+  margin-bottom: 0;
 }
 
 .el-row {
-  display: flex; /* 使用 flex 布局 */
-  align-items: center; /* 垂直居中 */
+  display: flex;
+  align-items: center;
 }
 
 .el-col {
   display: flex;
   align-items: center;
 }
- .table-container {
+
+.table-container {
   margin: 20px auto;
   width: 80%;
   max-width: 800px;
@@ -76,6 +131,32 @@ const EventAttend = {
 
 .el-table {
   margin-top: 20px;
+}
+
+.el-pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.edit-form {
+  padding: 20px;
+}
+
+.info-row {
+  margin-bottom: 15px;
+}
+
+.status-row {
+  margin-top: 20px;
+}
+
+.label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.el-radio {
+  margin-right: 15px;
 }
 </style>
 `,
@@ -87,37 +168,102 @@ const EventAttend = {
                 date: '',
                 status: ''
             },
-            attends: [] // 初始化 attends 为空数组
+            attends: [],
+            confirmDialogVisible: false,
+            confirmationMessage: '',
+            currentPage: 1,
+            pageSize: 7,
+            editDialogVisible: false,
+            editingAttendance: {
+                name: '',
+                date: '',
+                status: '',
+                index: -1
+            }
         };
     },
+    computed: {
+        total() {
+            return this.attends.length;
+        },
+        paginatedAttends() {
+            const start = (this.currentPage - 1) * this.pageSize;
+            const end = start + this.pageSize;
+            return this.attends.slice(start, end);
+        }
+    },
     created() {
-        this.loadAttends(); // 组件创建时加载数据
+        this.loadAttends();
     },
     methods: {
         loadAttends() {
-            // 将 attends.js 中的数据加载到组件的 attends 数组中
             this.attends = [...attends];
         },
-        addAttendance() {
-            // 表单验证
-            if (!this.newAttendance.name || !this.newAttendance.date || !this.newAttendance.status) {
-                this.$message.error('请填写完整的考勤信息');
+        validateForm() {
+            if (!this.newAttendance.name.trim()) {
+                this.$message.error('请填写姓名');
+                return false;
+            }
+            if (!this.newAttendance.date) {
+                this.$message.error('请选择日期');
+                return false;
+            }
+            if (!this.newAttendance.status) {
+                this.$message.error('请选择考勤状态');
+                return false;
+            }
+            return true;
+        },
+        showConfirmDialog() {
+            if (!this.validateForm()) {
                 return;
             }
-
-            // 添加新记录
-            this.attends.push({ ...this.newAttendance });
-
-            // 重置表单
+            this.confirmationMessage = `${this.newAttendance.name} 在 ${this.formatDate(this.newAttendance.date)} ${this.newAttendance.status}`;
+            this.confirmDialogVisible = true;
+        },
+        addNewAttendanceAndClose() {
+            // 在数组开头添加新记录
+            this.attends.unshift({ ...this.newAttendance });
             this.newAttendance = { name: '', date: '', status: '' };
-
-            // 提示添加成功
+            this.confirmDialogVisible = false;
             this.$message.success('考勤记录添加成功');
+            // 确保显示第一页
+            this.currentPage = 1;
+        },
+        showEditDialog(index) {
+            // 计算在完整数据中的实际索引
+            const realIndex = (this.currentPage - 1) * this.pageSize + index;
+            const record = this.attends[realIndex];
+            this.editingAttendance = {
+                ...record,
+                index: realIndex
+            };
+            this.editDialogVisible = true;
+        },
+        confirmEdit() {
+            // 更新记录
+            this.attends[this.editingAttendance.index].status = this.editingAttendance.status;
+            this.editDialogVisible = false;
+            this.$message.success('考勤记录修改成功');
         },
         deleteRecord(index) {
-            // 删除指定索引的记录
-            this.attends.splice(index, 1);
+            // 计算在完整数据中的实际索引
+            const realIndex = (this.currentPage - 1) * this.pageSize + index;
+            this.attends.splice(realIndex, 1);
+
+            // 如果当前页没有数据了且不是第一页，则跳转到上一页
+            if (this.paginatedAttends.length === 0 && this.currentPage > 1) {
+                this.currentPage--;
+            }
+
             this.$message.success('考勤记录删除成功');
+        },
+        handleCurrentChange(val) {
+            this.currentPage = val;
+        },
+        formatDate(dateString) {
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+            return new Date(dateString).toLocaleDateString('zh-CN', options);
         }
     }
 };
