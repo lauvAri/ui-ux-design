@@ -90,13 +90,19 @@
                                 <el-menu-item index="1-2" @click="currentMenu = '1-2'">成绩录入</el-menu-item>
                             </el-menu-item-group>
                         </el-submenu>
-                        <el-menu-item index="2" @click="currentMenu = '2'">
-                            <i class="el-icon-menu"></i>
-                            <span slot="title">考勤管理</span>
-                        </el-menu-item>
+                        <el-submenu index="2">
+                            <template slot="title">
+                                <i class="el-icon-location"></i>
+                                <span>教学管理</span>
+                            </template>
+                            <el-menu-item-group>
+                                <el-menu-item index="2-1" @click="currentMenu = '2-1'">课程管理</el-menu-item>
+                                <el-menu-item index="2-2" @click="currentMenu = '2-2'">考勤管理</el-menu-item>
+                            </el-menu-item-group>
+                        </el-submenu>
                         <el-menu-item index="3" @click="currentMenu = '3'">
-                            <i class="el-icon-document"></i>
-                            <span slot="title">通知公告</span>
+                            <i class="el-icon-location"></i>
+                            <span slot="title">公告展示</span>
                         </el-menu-item>
                         <el-menu-item index="4" @click="currentMenu = '4'">
                             <i class="el-icon-setting"></i>
@@ -113,11 +119,16 @@
                         <grade-info></grade-info>
                         <script type="module" src="./GradeInfo.js"></script>
                     </div>
-                    <div class="attendance-info" v-if="currentMenu === '2'">
-                        这是考勤管理页面
+                    <div class="course-info" v-if="currentMenu === '2-1'">
+                        这是课程管理页面
+                    </div>
+                    <div class="attendance-info" v-if="currentMenu === '2-2'">
+                        <event-attend></event-attend>
+                        <script type="module" src="./EventAttend.js"></script>
                     </div>
                     <div class="notice-info" v-if="currentMenu === '3'">
-                        这是通知公告页面
+                        <event-notice></event-notice>
+                        <script type="module" src="./EventNotice.js"></script>
                     </div>
                     <div class="account-info" v-if="currentMenu === '4'">
                         这是账户设置页面
