@@ -61,22 +61,22 @@ const EventTable = {
         <el-dialog title="新增学生" :visible.sync="dialogVisible">
             <el-form :model="newStudent" label-width="80px" :rules="rules" ref="newStudentForm">
                 <el-form-item label="姓名" prop="name">
-                    <el-input v-model="newStudent.name"></el-input>
+                    <el-input v-model="newStudent.name" @change="onFieldChange"></el-input>
                 </el-form-item>
                 <el-form-item label="性别" prop="gender">
-                    <el-select v-model="newStudent.gender">
+                    <el-select v-model="newStudent.gender" @change="onFieldChange">
                         <el-option value="男" label="男"></el-option>
                         <el-option value="女" label="女"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="学号" prop="studentId">
-                    <el-input v-model="newStudent.studentId"></el-input>
+                    <el-input v-model="newStudent.studentId" @change="onFieldChange"></el-input>
                 </el-form-item>
                 <el-form-item label="电话号码" prop="mobile">
                     <el-input v-model="newStudent.mobile"></el-input>
                 </el-form-item>
                 <el-form-item label="学院" prop="school">
-                    <el-select v-model="newStudent.school" placeholder="选择学院" filterable>
+                    <el-select v-model="newStudent.school" placeholder="选择学院" filterable @change="onFieldChange">
                         <el-option
                             v-for="item in schools"
                             :key="item.value"
@@ -86,7 +86,7 @@ const EventTable = {
                     </el-select>
                 </el-form-item>
                 <el-form-item label="专业" prop="major">
-                    <el-select v-model="newStudent.major" placeholder="选择专业" filterable>
+                    <el-select v-model="newStudent.major" placeholder="选择专业" filterable @change="onFieldChange">
                         <el-option
                             v-for="item in majors.filter(major => major.school === newStudent.school)"
                             :key="item.value"
@@ -96,6 +96,7 @@ const EventTable = {
                     </el-select>
                 </el-form-item>
             </el-form>
+            <el-progress :text-inside="true" :stroke-width="26" :percentage="progress"></el-progress>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="closeDialog">取 消</el-button>
                 <el-button type="primary" @click="addNewStudentAndClose">确 定</el-button>
@@ -113,6 +114,20 @@ const EventTable = {
                 :prop="column.prop"
                 :label="column.label"
                 ></el-table-column>
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button
+                    size="mini"
+                    @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                    <el-popconfirm title="确定删除吗？">
+                        <el-button
+                        size="mini"
+                        type="danger"
+                        slot="reference"
+                        @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                    </el-popconfirm>
+                </template>
+            </el-table-column>
         </el-table>
     </div>
     `,
@@ -141,6 +156,7 @@ const EventTable = {
             students,
             schools,
             majors,
+            progress: 0,//进度条的初始值
 
             rules: {
                 name: [
@@ -187,21 +203,6 @@ const EventTable = {
             });
         },
         addNewStudentAndClose() {
-            // if (this.newStudent.name.trim() === '' ||
-            //     this.newStudent.gender.trim() === '' ||
-            //     this.newStudent.studentId.trim() === '' ||
-            //     this.newStudent.mobile.trim() === '' ||
-            //     this.newStudent.school.trim() === '' ||
-            //     this.newStudent.major.trim() === '') {
-            //         //提醒失败
-            //         const h = this.$createElement;
-
-            //         this.$notify({
-            //             title: '提交失败',
-            //             message: h('i', { style: 'color: red' }, '请完整填写表单')
-            //         });
-            //     return;
-            //}
             this.$refs['newStudentForm'].validate((v) => {
                 if (v) {
                     this.originalStudents.push({ ...this.newStudent });
@@ -242,6 +243,20 @@ const EventTable = {
                 major: ''
             };
         },
+        handleEdit(index, row) {
+            console.log(index, row);
+        },
+        handleDelete(index, row) {
+            console.log(index, row);
+        },
+        updataProgress() {
+            this.progress = this.completedPercentage;
+        },
+        onFieldChange() {
+            this.$refs['newStudentForm'].validate(this.rules, () => { 
+                this.updataProgress()
+            });
+        }
     },
     watch: {
         school(newVal) {
@@ -258,7 +273,20 @@ const EventTable = {
             return originalStudents.filter(student =>
                 (!this.school || student.school === this.school) &&
                 (!this.major || student.major === this.major))
-        } 
+        },
+        completedPercentage() {
+            let completed = 0;
+            const requiredFields = ['name', 'gender', 'studentId', 'mobile', 'school', 'major'];
+            const newStudentData = this.newStudent;
+
+            requiredFields.forEach(filed => {
+                if (newStudentData[filed]) {
+                    completed++;
+                }
+            })
+
+            return Math.round((completed / requiredFields.length) * 100)
+        }
     },
 }
 
