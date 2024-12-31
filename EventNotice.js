@@ -1,5 +1,5 @@
 // EventNoticeComponent.js
-import { notices, addNotice, deleteNotice } from './notices.js';
+import { notices, addNotice, deleteNotice, saveDraft, getDrafts, deleteDraft } from './notices.js';
 import sources from "./sources.js";
 
 const EventNotice = {
@@ -29,6 +29,15 @@ const EventNotice = {
                 label="日期"
                 width="100">
             </el-table-column>
+            <el-table-column
+                label="操作"
+                width="150"
+                v-if="currentView === 'drafts'">
+                <template slot-scope="scope">
+                    <el-button type="primary" size="mini" @click="editDraft(scope.row)">修改</el-button>
+                    <el-button type="danger" size="mini" @click="deleteDraft(scope.row.id)">删除</el-button>
+                </template>
+            </el-table-column>
         </el-table>
             <el-pagination
             @current-change="handleCurrentChange"
@@ -47,14 +56,14 @@ const EventNotice = {
         <el-row :gutter="0" style="height: 95px; display: flex; text-align: center;">
             <el-col :span="8" style="border-right: 2px solid lightgray;display: flex; align-items: center; justify-content: center;">
                 <div class="grid-content bg-purple" style="margin:0">
-                    <label style="font-size:20px">0</label><br>
-                    <label>我收藏的</label>
+                    <label style="font-size:20px">{{ draftCount }}</label><br>
+                    <label @click="showDrafts">已保存的</label>
                 </div>
             </el-col>
             <el-col :span="8" style="border-right: 2px solid lightgray;display: flex; align-items: center; justify-content: center;">
                 <div class="grid-content bg-purple" style="margin:0">
-                    <label style="font-size:20px">3</label><br>
-                    <label>我发起的</label>
+                    <label style="font-size:20px">{{ publishedCount }}</label><br>
+                    <label @click="showPublished">已发布的</label>
                 </div>
             </el-col>
             <el-col :span="8" style="display: flex; align-items: center; justify-content: center;">
@@ -66,13 +75,12 @@ const EventNotice = {
         </el-row>
     </el-main>
     
-    
-   <el-dialog title="公告编辑" :visible.sync="dialogVisible">
-    <el-form :model="newNotice" label-width="80px">
+   <el-dialog title="公告编辑" :visible.sync="dialogVisible" width="60%">
+    <el-form :model="newNotice" label-width="80px" style="width: 90%">
         <el-row :gutter="20">
             <el-col :span="14">
                 <el-form-item label="公告标题">
-                    <el-input v-model="newNotice.info"></el-input>
+                    <el-input v-model="newNotice.info" placeholder="请输入公告标题"></el-input>
                 </el-form-item>
             </el-col>
             <el-col :span="10">
@@ -94,7 +102,9 @@ const EventNotice = {
                 type="textarea"
                 :rows="10"
                 style="width: 100%"
-                placeholder="在这里输入正文内容"
+                placeholder="在这里输入正文内容（最多 2000 字）"
+                maxlength="2000"
+                show-word-limit
             />
         </el-form-item>
     </el-form>
@@ -122,30 +132,39 @@ const EventNotice = {
             dialogVisible: false,
             confirmDialogVisible: false,
             newNotice: {
+                id: '', // 用于区分新增和修改
                 info: '',
                 source: '',
                 mainText: '',
                 date: ''
             },
-            // 动态加载 notices 数据
-            tableData: [],
-            currentView: null,
+            tableData: [], // 当前显示的公告数据
+            currentView: 'published',
             currentPage: 1,
             pageSize: 10,
-            total: notices.length,
-            sources: sources
+            total: 0,
+            sources: sources,
+            draftCount: 0, // 草稿数量
+            publishedCount: 0 // 已发布公告数量
         };
     },
     created() {
-        // 组件创建时从 notices 加载数据
         this.loadNotices();
+        this.updateCounts();
     },
     methods: {
         loadNotices() {
-            this.tableData = [...notices];
+            if (this.currentView === 'drafts') {
+                this.tableData = getDrafts(); // 加载草稿
+            } else {
+                this.tableData = [...notices]; // 加载已发布公告
+            }
             this.total = this.tableData.length;
         },
-
+        updateCounts() {
+            this.draftCount = getDrafts().length;
+            this.publishedCount = notices.length;
+        },
         addNewNoticeAndClose() {
             const currentDate = new Date().toISOString().split('T')[0];
             const newNotice = {
@@ -156,15 +175,13 @@ const EventNotice = {
                 mainText: this.newNotice.mainText
             };
 
-            // 添加到 notices.js 和本地存储
             if (addNotice(newNotice)) {
-                // 重新加载数据以确保与存储同步
                 this.loadNotices();
-                this.currentPage = 1;  // 重置到第一页
-
+                this.currentPage = 1;
                 this.confirmDialogVisible = false;
                 this.dialogVisible = false;
                 this.resetNewNotice();
+                this.updateCounts();
 
                 this.$message({
                     message: '公告已成功发布',
@@ -173,26 +190,27 @@ const EventNotice = {
             }
         },
         getNoticeUrl(id) {
-            return `./notice-detail.html?id=${id}`; // 生成公告详情页链接
-        },
-        handleClick(row) {
-            if (row.url) {
-                window.location.href = row.url;
-            }
+            return `./notice-detail.html?id=${id}`;
         },
         closeDialog() {
             this.dialogVisible = false;
             this.resetNewNotice();
         },
-
         saveNewNotice() {
-            // 这里可以添加保存草稿的逻辑
-
-
-            this.$message({
-                message: '公告已保存为草稿',
-                type: 'success'
-            });
+            if (this.validateNewNotice()) {
+                const draft = {
+                    id: this.newNotice.id || Date.now().toString(), // 如果存在 ID，则使用原 ID
+                    ...this.newNotice
+                };
+                saveDraft(draft);
+                this.updateCounts();
+                this.$message({
+                    message: '公告已保存为草稿',
+                    type: 'success'
+                });
+                this.closeDialog();
+                this.loadNotices(); // 重新加载数据
+            }
         },
         validateNewNotice() {
             if (!this.newNotice.info || !this.newNotice.source || !this.newNotice.mainText) {
@@ -209,36 +227,48 @@ const EventNotice = {
                 this.confirmDialogVisible = true;
             }
         },
-        toggleView(view) {
-            this.currentView = this.currentView === view ? null : view;
-        },
         handleCurrentChange(val) {
             this.currentPage = val;
         },
-
         paginatedData() {
             const start = (this.currentPage - 1) * this.pageSize;
             const end = start + this.pageSize;
-            // No need to sort here as the data is already sorted
             return this.tableData.slice(start, end);
         },
         resetNewNotice() {
             this.newNotice = {
+                id: '',
                 info: '',
                 source: '',
                 mainText: '',
                 date: ''
             };
         },
-
-
-        deleteExistingNotice(info) {
-            // 示例：删除公告
-            const isDeleted = deleteNotice(info);
-            if (isDeleted) {
-                this.tableData = this.tableData.filter(notice => notice.info !== info);
+        showDrafts() {
+            this.currentView = 'drafts';
+            this.loadNotices();
+        },
+        showPublished() {
+            this.currentView = 'published';
+            this.loadNotices();
+        },
+        editDraft(draft) {
+            this.newNotice = { ...draft }; // 加载草稿内容
+            this.dialogVisible = true;
+        },
+        deleteDraft(id) {
+            if (deleteDraft(id)) {
+                this.updateCounts(); // 更新草稿数量
+                this.loadNotices(); // 重新加载数据
+                this.$message({
+                    message: '草稿已删除',
+                    type: 'success'
+                });
             } else {
-                alert('未找到要删除的公告');
+                this.$message({
+                    message: '删除草稿失败',
+                    type: 'error'
+                });
             }
         }
     }
