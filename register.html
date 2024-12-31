@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>element ui</title>
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.14/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui@2.15.14/lib/index.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        #app {
+            height: 100vh;
+        }
+        .el-header {
+            background-color: #409EFF;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .el-header div:nth-child(1) {
+            font-size: 24px;
+            flex: 1;
+            text-align: center;
+            letter-spacing: 24px;
+        }
+        .main {
+            background-color: #e9eef3;
+        }
+        .loginForm {
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 30px;
+            width: 60%;
+            background-color: #fff;
+            position: relative;
+            top:10%;
+            left: 20%;
+            border:2px solid #409EFF;
+        }
+        
+        .loginFormText{
+            position: relative;
+            padding: 0%;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #409EFF;
+        }
+
+        .el-icon-monitor{
+            font-size: 50px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .el-icon-user{
+            font-size: 30px;
+        }
+
+        .el-icon-lock{
+            font-size: 30px;
+        }
+
+        .el-input {
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <el-container>
+            <el-header id="header" class="el-header" style="height: 60px;">
+                <div>
+                    学生信息管理系统
+                </div>
+                <div>
+                    <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+                </div>
+            </el-header>
+        </el-container>
+
+        <div class="main" style="height: calc(100vh - 60px);;">
+            <div class="loginForm">
+                <i class="el-icon-monitor"></i><br/>
+                <div class="loginFormText">
+                    账 号 注 册 界 面
+                </div>
+                <br/>
+                <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" class="demo-ruleForm" label-position="left">
+                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    <el-form-item label="账号" prop="username">
+                        <el-input type="username" v-model="ruleForm.username" autocomplete="off" id="usernameIpt"></el-input>
+                    </el-form-item>
+                    </div>
+                
+                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    <el-form-item label="密码" prop="pass">
+                        <el-input type="password" v-model="ruleForm.pass" autocomplete="off" ref="passwordInput" id="passwordIpt"></el-input>
+                    </el-form-item>
+                    </div>
+                
+                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    <el-form-item label="确认密码" prop="checkPass">
+                        <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off" ref="checkPassInput" id="checkPassIpt"></el-input>
+                    </el-form-item>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: center; gap: 10px; margin: 0;">
+                        <el-form-item>
+                            <el-button type="primary" @click="onSubmit" style="margin: 0;">提交</el-button>
+                            <el-button @click="onReset">重置</el-button>
+                        </el-form-item>
+                    </div>
+                    <div style="display: flex; align-items: center;justify-content: center;">
+                        <el-link href="login.html" type="primary">点击我返回登录界面</el-link>
+                    </div>
+                  </el-form>
+            </div>
+        </div>
+
+        <el-dialog
+            title="提示"
+            :visible.sync="successDialogVisible"
+            width="30%"
+            :before-close="handleClose">
+            <span>注册成功</span>
+            <span slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="registerSuccess">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+            title="提示"
+            :visible.sync="failDialogVisible"
+            width="30%"
+            :before-close="handleClose">
+            <span>注册内容不符合要求，请重试</span>
+            <span slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="failDialogVisible = false">确 定</el-button>
+            </span>
+        </el-dialog>
+    </div>
+
+
+    <script src="account/login.js"></script>
+    <script src="account/account.js"></script>
+    <script>
+        new Vue({
+        el: '#app',
+        data() {
+            var validateUser = (rule,value,callback) => {
+                if (value === '') {
+                    callback(new Error('请输入账号'));
+                }else if(!isRegisterUserValid(value)){
+                    callback(new Error('账号至少为五位'))
+                }else if(isUserExist(value)){
+                    callback(new Error('账号已存在，请尝试更换'))
+                }else {
+                    callback();
+                }
+            }
+            var validatePass = (rule, value, callback) => {
+                if (value === '') {
+                callback(new Error('请输入密码'));
+                }else if(!isRegisterPasswordValid(value)){
+                    callback(new Error('密码至少为5位且应包含字母以及数字'))
+                }else {
+                if (this.ruleForm.checkPass !== '') {
+                    this.$refs.ruleForm.validateField('checkPass');
+                }
+                callback();
+                }
+            }
+            var validatePass2 = (rule, value, callback) => {
+                if (value === '') {
+                callback(new Error('请再次输入密码'));
+                } else if (value !== this.ruleForm.pass) {
+                callback(new Error('两次输入密码不一致!'));
+                } else {
+                callback();
+                }
+            }
+            return {
+                visible: true,
+                failDialogVisible: false,
+                successDialogVisible: false,
+                ruleForm: {
+                    username:'',
+                    pass: '',
+                    checkPass: ''
+                },
+                rules: {
+                    username: [
+                        {validator: validateUser, trigger: 'blur'}
+                    ],
+                    pass: [
+                        { validator: validatePass, trigger: 'blur' }
+                    ],
+                    checkPass: [
+                        { validator: validatePass2, trigger: 'blur' }
+                    ],
+                }
+            }
+        },
+        mounted(){
+            username = document.getElementById("usernameIpt");
+            document.addEventListener('keydown',this.keydownOccured);
+        },
+        
+        methods : {
+            onSubmit() {
+            // 在这里执行注册逻辑
+            if(isRegisterUserValid(this.ruleForm.username) && isRegisterPasswordValid(this.ruleForm.pass) && 
+            isRegisterCheckpassValid(this.ruleForm.pass,this.ruleForm.checkPass) && !isUserExist(this.ruleForm.username)){
+                saveAccountData(this.ruleForm.username,this.ruleForm.pass);
+                setNowLoginUser(this.ruleForm.username);
+                this.successDialogVisible = true;
+            }else{
+                this.failDialogVisible = true;
+                if(!isRegisterUserValid(this.ruleForm.username) || isUserExist(this.ruleForm.username)){
+                    this.ruleForm.username = '';
+                }
+                if(!isRegisterPasswordValid(this.ruleForm.pass)){
+                    this.ruleForm.pass = '';
+                }
+                if(!isRegisterCheckpassValid(this.ruleForm.pass,this.ruleForm.checkPass)){
+                    this.ruleForm.checkPass = '';
+                }
+            }
+            },
+            onReset(){
+                this.ruleForm.username = '';
+                this.fuleForm.pass = '';
+                this.ruleForm.checkPass = '';
+            },
+            registerSuccess() {
+                window.location.href = 'index.html';
+            },
+            keydownOccured(event) {
+                //console.log("keydown");
+                //没有框弹出
+                if(this.successDialogVisible == false && this.failDialogVisible == false){
+                    if (event.key === 'Enter'&& document.activeElement.id === "usernameIpt") {  //焦点在账号框 按enter到密码框
+                    event.preventDefault(); // 阻止默认行为（表单提交等）
+                    //console.log("Enter pressed on username input, focusing password input.");
+
+                    // 将焦点设置到密码输入框
+                    this.$nextTick(() => {
+                    if (this.$refs.passwordInput) {
+                        this.$refs.passwordInput.focus();
+                        }
+                    });
+                    }
+                    else if(event.key === 'Enter'&& document.activeElement.id === "passwordIpt"){   //焦点在密码框 按enter到确认密码框
+                        // 将焦点设置到确认密码输入框
+                        this.$nextTick(() => {
+                        if (this.$refs.checkPassInput) {
+                            this.$refs.checkPassInput.focus();
+                            }
+                        });
+                    }
+                    else if(event.key === 'Enter'&& document.activeElement.id === "checkPassIpt"){   //焦点在确认密码框 按enter提交
+                        //console.log("submit");
+                        this.onSubmit();
+                    }
+                }else if(this.successDialogVisible == true && this.failDialogVisible == false){ //弹出登陆成功窗口
+                    if (event.key === 'Enter'){
+                        this.successDialogVisible = false;
+                        window.location.href = 'index.html';
+                    }
+                }else if(this.successDialogVisible == false && this.failDialogVisible == true){ //弹出失败窗口
+                    if (event.key === 'Enter'){
+                        this.failDialogVisible = false;
+                    }
+                }
+                
+            },
+            handleClose(done) {
+                console.log('关闭前的处理');
+                done(); // 调用 done() 来执行关闭操作
+            },
+        }
+    })
+    </script>
+
+</body>
+</html>
