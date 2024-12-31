@@ -49,7 +49,7 @@ const EventTable = {
                 ></el-option>
             </el-select>
             <div id="search-student">
-                <el-input v-model="name" placeholder="姓名" required></el-input>
+                <el-input v-model="name" placeholder="姓名" @keyup.native="searchStudentByName" required></el-input>
                 <el-button icon="el-icon-search" circle @click='searchStudentByName()'></el-button>
             </div>
             <!-- 触发新增学生对话框的按钮 -->
@@ -108,6 +108,51 @@ const EventTable = {
             </span>
         </el-dialog>
        
+        <!-- 编辑学生的弹出表单 -->
+        <el-dialog title="编辑学生" :visible.sync="editDialogVisible">
+            <el-form :model="editStudent" label-width="80px" :rules="rules" ref="editStudentForm">
+                <el-form-item label="姓名" prop="name">
+                    <el-input v-model="editStudent.name"></el-input>
+                </el-form-item>
+                <el-form-item label="性别" prop="gender">
+                    <el-select v-model="editStudent.gender">
+                        <el-option value="男" label="男"></el-option>
+                        <el-option value="女" label="女"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="学号" prop="studentId">
+                    <el-input v-model="editStudent.studentId"></el-input>
+                </el-form-item>
+                <el-form-item label="电话号码" prop="mobile">
+                    <el-input v-model="editStudent.mobile"></el-input>
+                </el-form-item>
+                <el-form-item label="学院" prop="school">
+                    <el-select v-model="editStudent.school" placeholder="选择学院" filterable>
+                        <el-option
+                            v-for="item in schools"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="专业" prop="major">
+                    <el-select v-model="editStudent.major" placeholder="选择专业" filterable>
+                        <el-option
+                            v-for="item in majors.filter(major => major.school === editStudent.school)"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="updateStudentsAndClose">确 定</el-button>
+            </span>
+        </el-dialog>
+
         <el-table
             :data="studentsFiltered"
             style="width: 100%"
@@ -139,7 +184,16 @@ const EventTable = {
     data() {
         return {
             dialogVisible: false,
+            editDialogVisible: false,
             newStudent: {
+                name: '',
+                gender: '',
+                studentId: '',
+                mobile: '',
+                school: '',
+                major: ''
+            },
+            editStudent: {
                 name: '',
                 gender: '',
                 studentId: '',
@@ -252,6 +306,8 @@ const EventTable = {
         },
         handleEdit(index, row) {
             console.log(index, row);
+            this.editStudent = { ...row }; // 复制当前行的数据到编辑表单
+            this.editDialogVisible = true; // 打开编辑对话框
         },
         handleDelete(index, row) {
             console.log(index, row);
@@ -263,7 +319,36 @@ const EventTable = {
             this.$nextTick(() => {
                 this.progress = this.completedPercentage;
             });
-        }
+        },
+        updateStudentsAndClose() {
+            this.$refs['editStudentForm'].validate((valid) => {
+                console.log('点击了确定键')
+                if (valid) {
+                    const index = this.originalStudents.findIndex(student => student.studentId === this.editStudent.studentId);
+                    if (index !== -1) {
+                        //更新信息
+                        this.originalStudents.splice(index, 1, { ...this.editStudent });
+                        this.studentsFiltered = [...this.originalStudents];
+                    }
+                    //提醒成功
+                    this.$notify({
+                        title: '更新成功',
+                        message: '学生信息已更新',
+                        type: 'success'
+                    })
+
+                    //关闭对话框
+                    this.editDialogVisible = false;
+                } else {
+                    //提示失败
+                    this.$notify({
+                        title: '更新失败',
+                        message: '请完整填写表单',
+                        type: 'error'
+                    })
+                }
+            }) 
+        },
     },
     watch: {
         school(newVal) {
