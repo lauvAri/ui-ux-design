@@ -224,6 +224,7 @@
             if(isRegisterUserValid(this.ruleForm.username) && isRegisterPasswordValid(this.ruleForm.pass) && 
             isRegisterCheckpassValid(this.ruleForm.pass,this.ruleForm.checkPass) && !isUserExist(this.ruleForm.username)){
                 saveAccountData(this.ruleForm.username,this.ruleForm.pass);
+                setNowLoginUser(this.ruleForm.username);
                 this.successDialogVisible = true;
             }else{
                 this.failDialogVisible = true;

@@ -180,6 +180,7 @@
             onSubmit() {
             // 在这里执行登录逻辑
             if(isAccountCorrect(this.username,this.password)){
+                setNowLoginUser(this.username);
                 this.successDialogVisible = true;
             }else{
                 this.failDialogVisible = true;
