@@ -26,6 +26,12 @@ const GradeInfo = {
                   @click="filterStudents">
                   查询
               </el-button>
+              <el-button
+                  type="default"
+                  size="mini"
+                  @click="resetFilter">
+                  重置
+              </el-button>
           </div>
           
           <el-dialog title="选择科目" :visible.sync="showDialog">
@@ -102,14 +108,13 @@ const GradeInfo = {
     methods: {
         updateScore(row) {
             // 检查成绩是否在0到100之间
-            if (row.inputValue < 0 || row.inputValue > 100) {
+            if (row.inputValue < 0 || row.inputValue > 100|| isNaN(row.inputValue)) {
                 // 使用Element UI的$message方法提示用户
-                this.$message.error('成绩必须在0到100之间，请重新输入。');
-            } 
-            else if (row.inputValue === '') {
+                this.$message.error('成绩必须在0到100之间的整数，请重新输入。');
+            } else if (row.inputValue === '') {
+                // 使用Element UI的$message方法提示用户
                 this.$message.error('成绩不能为空，请重新输入。');
-            }
-            else {
+            } else {
                 // 根据选择的科目更新对应的成绩
                 const subjectKey = `grades.${row.selectedSubject.toLowerCase()}`;
                 if (!row.grades) {
@@ -117,11 +122,15 @@ const GradeInfo = {
                 }
                 this.$set(row.grades, row.selectedSubject.toLowerCase(), row.inputValue);
                 this.$message.success('成功修改成绩！');
+                
+                // 更新 filteredStudents 中的对应学生的成绩
+                const student = this.filteredStudents.find(s => s.name === row.name);
+                if (student) {
+                    this.$set(student.grades, row.selectedSubject.toLowerCase(), row.inputValue);
+                }
             }
             // 清空输入框
             row.inputValue = '';
-            // 调用 updateColumns 方法以更新表中数据
-            this.updateColumns();
         },
         updateColumns() {
             // 固定的科目顺序数组
@@ -198,6 +207,20 @@ const GradeInfo = {
             }
             // 按照名字的字典顺序对 filteredStudents 进行排序
             this.filteredStudents.sort((a, b) => a.name.localeCompare(b.name));
+            // 清空搜索关键字
+            this.searchKeyword = '';
+        },
+        resetFilter() {
+            // 过滤出包含所有勾选科目的学生
+            this.filteredStudents = this.students.filter(student => {
+                return this.selectedSubjects.every(subject => {
+                    return student.grades && student.grades[subject.toLowerCase()] !== "未选择";
+                });
+            });
+            // 按照名字的字典顺序对 filteredStudents 进行排序
+            this.filteredStudents.sort((a, b) => a.name.localeCompare(b.name));
+            // 清空搜索关键字
+            this.searchKeyword = '';
         }
     }
 }
