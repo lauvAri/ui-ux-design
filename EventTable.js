@@ -238,6 +238,7 @@ const EventTable = {
             this.dialogVisible = false;
             this.resetNewStudent(); // 取消时也重置表单
             this.$refs['newStudentForm'].resetFields();
+            this.progress = 0;
         },
         resetNewStudent() {
             this.newStudent = {
