@@ -52,30 +52,31 @@ const EventTable = {
                 <el-input v-model="name" placeholder="姓名" required></el-input>
                 <el-button icon="el-icon-search" circle @click='searchStudentByName()'></el-button>
             </div>
+            <!-- 触发新增学生对话框的按钮 -->
+            <el-button type="primary" @click="dialogVisible = true">新增学生</el-button>
         </div>
-        <!-- 触发新增学生对话框的按钮 -->
-        <el-button type="primary" @click="dialogVisible = true">新增学生</el-button>
+        
 
         <!-- 新增学生的弹出表单 -->
         <el-dialog title="新增学生" :visible.sync="dialogVisible">
-            <el-form :model="newStudent" label-width="80px">
-                <el-form-item label="姓名">
-                    <el-input v-model="newStudent.name"></el-input>
+            <el-form :model="newStudent" label-width="80px" :rules="rules" ref="newStudentForm">
+                <el-form-item label="姓名" prop="name">
+                    <el-input v-model="newStudent.name" @change="onFieldChange('name')"></el-input>
                 </el-form-item>
-                <el-form-item label="性别">
-                    <el-select v-model="newStudent.gender">
+                <el-form-item label="性别" prop="gender">
+                    <el-select v-model="newStudent.gender" @change="onFieldChange('gender')">
                         <el-option value="男" label="男"></el-option>
                         <el-option value="女" label="女"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="学号">
-                    <el-input v-model="newStudent.studentId"></el-input>
+                <el-form-item label="学号" prop="studentId">
+                    <el-input v-model="newStudent.studentId" @change="onFieldChange('studentId')"></el-input>
                 </el-form-item>
-                <el-form-item label="电话号码">
-                    <el-input v-model="newStudent.mobile"></el-input>
+                <el-form-item label="电话号码" prop="mobile">
+                    <el-input v-model="newStudent.mobile" @change="onFieldChange('mobile')"></el-input>
                 </el-form-item>
-                <el-form-item label="学院">
-                    <el-select v-model="newStudent.school" placeholder="选择学院" filterable>
+                <el-form-item label="学院" prop="school">
+                    <el-select v-model="newStudent.school" placeholder="选择学院" filterable @change="onFieldChange('school')">
                         <el-option
                             v-for="item in schools"
                             :key="item.value"
@@ -84,8 +85,8 @@ const EventTable = {
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="专业">
-                    <el-select v-model="newStudent.major" placeholder="选择专业" filterable>
+                <el-form-item label="专业" prop="major">
+                    <el-select v-model="newStudent.major" placeholder="选择专业" filterable @change="onFieldChange('major')">
                         <el-option
                             v-for="item in majors.filter(major => major.school === newStudent.school)"
                             :key="item.value"
@@ -95,6 +96,12 @@ const EventTable = {
                     </el-select>
                 </el-form-item>
             </el-form>
+            <el-progress
+                :text-inside="false"
+                :stroke-width="26"
+                :percentage="progress"
+                :status="progressStatus"
+                :format="progressFormat"></el-progress>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="closeDialog">取 消</el-button>
                 <el-button type="primary" @click="addNewStudentAndClose">确 定</el-button>
@@ -103,13 +110,29 @@ const EventTable = {
        
         <el-table
             :data="studentsFiltered"
-            style="width: 100%">
+            style="width: 100%"
+            height="600"
+            >
             <el-table-column
                 v-for="column in columns"
                 :key="column.prop"
                 :prop="column.prop"
                 :label="column.label"
                 ></el-table-column>
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button
+                    size="mini"
+                    @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                    <el-popconfirm title="确定删除吗？">
+                        <el-button
+                        size="mini"
+                        type="danger"
+                        slot="reference"
+                        @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                    </el-popconfirm>
+                </template>
+            </el-table-column>
         </el-table>
     </div>
     `,
@@ -138,6 +161,30 @@ const EventTable = {
             students,
             schools,
             majors,
+            progress: 0,//进度条的初始值
+
+            rules: {
+                name: [
+                    {required: true, message:'请输入学生姓名', trigger: 'blur'}
+                ],
+                gender: [
+                    {required: true, message:'请选择学生性别', trigger: 'blur'}
+                ],
+                studentId: [
+                    {required: true, message: '请输入学生学号', trigger: 'blur' },
+                    {min: 8, max:8, message:'学号的长度应该为8位', trigger: 'blur'}
+                ],
+                mobile: [
+                    { required: true, message: '请输入学生手机号', trigger: 'blur' },
+                    { min: 11, max: 11, message: '手机号应该为11位', trigger: 'blur' }
+                ],
+                school: [
+                    { required: true, message: '请选择学生学院', trigger: 'blur' },
+                ],
+                major: [
+                    { required: true, message: '请选择学生专业', trigger: 'blur' },
+                ],
+            }
         }
     },
     methods: {
@@ -161,18 +208,36 @@ const EventTable = {
             });
         },
         addNewStudentAndClose() {
-            this.originalStudents.push({ ...this.newStudent });
-            this.studentsFiltered = [...this.originalStudents]; // 更新过滤后的列表
+            this.$refs['newStudentForm'].validate((v) => {
+                if (v) {
+                    this.originalStudents.push({ ...this.newStudent });
+                    this.studentsFiltered = [...this.originalStudents]; // 更新过滤后的列表
 
-            // 清空表单
-            this.resetNewStudent();
+                    //提醒成功
+                    const h = this.$createElement;
 
-            // // 关闭对话框
-            // this.dialogVisible = false;
+                    this.$notify({
+                        title: '提交成功',
+                        message: h('i', { style: 'color: green' }, '提交成功！')
+                    });
+                    // 清空表单
+                    this.resetNewStudent();
+                    this.progress = 0;
+                } else {
+                    //提醒失败
+                    const h = this.$createElement;
+
+                    this.$notify({
+                        title: '提交失败',
+                        message: h('i', { style: 'color: red' }, '请完整填写表单')
+                    });
+                }
+            })
         },
         closeDialog() {
             this.dialogVisible = false;
             this.resetNewStudent(); // 取消时也重置表单
+            this.$refs['newStudentForm'].resetFields();
         },
         resetNewStudent() {
             this.newStudent = {
@@ -184,6 +249,20 @@ const EventTable = {
                 major: ''
             };
         },
+        handleEdit(index, row) {
+            console.log(index, row);
+        },
+        handleDelete(index, row) {
+            console.log(index, row);
+        },
+        updataProgress() {
+            this.progress = this.completedPercentage;
+        },
+        onFieldChange(fieldName) {
+            this.$nextTick(() => {
+                this.progress = this.completedPercentage;
+            });
+        }
     },
     watch: {
         school(newVal) {
@@ -200,7 +279,23 @@ const EventTable = {
             return originalStudents.filter(student =>
                 (!this.school || student.school === this.school) &&
                 (!this.major || student.major === this.major))
-        } 
+        },
+        completedPercentage() {
+            let completed = 0;
+            const requiredFields = ['name', 'gender', 'studentId', 'mobile', 'school', 'major'];
+            requiredFields.forEach(field => {
+                if (this.newStudent[field]) {
+                    completed++;
+                }
+            });
+            return Math.round((completed / requiredFields.length) * 100);
+        },
+        progressStatus() {
+            return this.progress === 100 ? 'success' : undefined;
+        },
+        progressFormat() {
+            return this.progress === 100 ? 'success' : `${this.progress}%`;
+        }
     },
 }
 
