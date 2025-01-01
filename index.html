@@ -81,7 +81,7 @@
             </el-header>
             <el-container>
                 <el-aside width="200px" id="aside">
-                    <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+                    <el-menu default-active="1-1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
                         <el-submenu index="1">
                             <template slot="title">
                                 <i class="el-icon-location"></i>
@@ -115,8 +115,8 @@
                         <grade-info></grade-info>
                         <script type="module" src="./GradeInfo.js"></script>
                     </div>
-                    <div class="course-info" v-if="currentMenu === '2-1'">
-                        这是课程管理页面
+                    <div class="empty" v-if="currentMenu === ''">
+                        <el-empty description="开始今天的工作"></el-empty>
                     </div>
                     <div class="attendance-info" v-if="currentMenu === '2'">
                         <event-attend></event-attend>
